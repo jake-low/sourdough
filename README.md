@@ -2,7 +2,7 @@
 
 Sourdough is a free vector tile schema for [OpenStreetMap] data. This repository contains the Sourdough [schema specification](./SCHEMA.md) and the Planetiler [reference implementation](./src/main/java/fyi/osm/sourdough/).
 
-![screenshot of a visualization of Sourdough tiles, showing the Boston area and the many kinds of data available in the tile schema](https://sourdough.osm.fyi/assets/banner.png)  
+[![screenshot of a visualization of Sourdough tiles, showing the Boston area and the many kinds of data available in the tile schema](https://sourdough.osm.fyi/assets/banner.png)](https://sourdough.osm.fyi/#11.8/42.365/-71.025)
 
 You can see a demo of Sourdough at [sourdough.osm.fyi](https://sourdough.osm.fyi)
 
