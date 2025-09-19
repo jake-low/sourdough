@@ -80,7 +80,7 @@ public class Highways implements FeatureProcessor, LayerPostProcessor {
         return;
       }
 
-      var isArea = sf.hasTag("area", "yes") || sf.hasTag("highway", "rest_area");
+      var isArea = sf.hasTag("area", "yes") || sf.hasTag("highway", "rest_area", "services");
 
       if (sf.canBeLine() && !isArea) {
         this.processHighwayLine(sf, fc);
