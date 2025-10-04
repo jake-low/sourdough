@@ -33,6 +33,7 @@ java -jar target/sourdough-builder-HEAD-with-deps.jar \
 
 - `--area <name>` - Download and process a named area (e.g., `washington`, `iceland`)
 - `--bounds <west>,<south>,<east>,<north>` - Only build tiles for a given bounds; if not specified, the bounds will be determined from the input OSM PBF file
+- `--maxzoom <int>` - Build tiles up to (and including) this zoom level. Sourdough's default maxzoom is 15, but you can omit higher zoom tiles if you don't need them. Note that certain features only show up at high zooms (for example `amenity=bench`, `natural=tree`, and `highway=street_lamp` only appear at zoom 15), so if you set a lower maxzoom, then your map won't be able to display these features.
 - `--output <path>` - Output file path
 - `--download` - Automatically download the required input data if missing
 - `--force` - Overwrite existing output file if it exists
