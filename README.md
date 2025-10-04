@@ -18,6 +18,25 @@ These goals come with some trade-offs:
 - Since Sourdough aims to be a simple and direct representation of OSM data, it leaves it to map-makers to handle [synonymous tags], [troll tags], and other idiosyncracies in OSM's data model.
 - Some popular cartographic effects (like placing curved text labels along lakes, or clustering nearby points of interest) require making opinionated decisions about how to transform the raw input data during tile generation. Sourdough aims to be a direct and naïve transformation of OSM data into vector tiles, so it avoids implementing these features, which means some effects are not possible (unless you modify the code yourself to add them).
 
+## Getting started
+
+There is currently no hosted service providing Sourdough tiles, so you'll need to generate and serve them yourself. For a state or small country, you can probably generate tiles on your own computer in just a few minutes. If you're building tiles for the whole planet, it'll take several hours, and you'll need >1TB of SSD storage and >64GB of RAM, so you may want to rent a virtual machine from your favorite cloud provider. See [USAGE.md](./USAGE.md) for detailed guidance.
+
+As a quick overview, here's how to build tiles for a small region:
+
+```bash
+# Build the Sourdough profile
+mvn package
+
+# Generate tiles for an area (e.g. Ísland / Iceland)
+java -jar target/sourdough-builder-HEAD-with-deps.jar \
+  --download \
+  --area iceland \
+  --output sourdough.pmtiles
+```
+
+This downloads the necessary input data (an OSM PBF extract from [Geofabrik](https://www.geofabrik.de/) and OSM Coastline data from [openstreetmap.de](https://osmdata.openstreetmap.de/data/coast.html)), generates tiles in the Sourdough schema, and writes them out to a PMTiles archive that you can upload to cloud storage and serve to web maps. See [docs.protomaps.com](https://docs.protomaps.com/) for advice on hosting and serving PMTiles data.
+
 ## License and attribution requirements
 
 The **Sourdough tile schema** and its **Planetiler reference implementation** contained in this repository are dedicated to the public domain via the [CC0] license. You may use them however you want, and do not need to give credit to the Sourdough project or its authors. See the [LICENSE](./LICENSE) file for details.
