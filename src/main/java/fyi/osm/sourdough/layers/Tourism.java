@@ -148,7 +148,7 @@ public class Tourism implements FeatureProcessor {
       case "alpine_hut", "wilderness_hut" -> 11;
       case "camp_site", "caravan_site", "museum", "theme_park", "aquarium", "zoo" -> 12;
       case "picnic_site", "viewpoint" -> 13;
-      case "hotel", "guest_house", "hostel", "motel", "chalet" -> 14;
+      case "hotel", "guest_house", "hostel", "motel", "chalet", "information" -> 14;
       default -> 15;
     };
   }
