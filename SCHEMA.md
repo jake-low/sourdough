@@ -103,7 +103,7 @@ The `barriers` layer contains features from OSM which are tagged `barrier=*`, in
 
 **Attributes**:
 - **Primary**: `barrier`, `fence_type`, `wall`, `kerb`
-- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `material`, `height`, `access`, `wheelchair`
+- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `material`, `height`, `access`, `wheelchair`, `tactile_paving`
 
 ### Boundaries
 
@@ -184,7 +184,7 @@ This layer **excludes** features tagged `highway=construction` or `highway=propo
 
 **Attributes**:
 - **Primary**: `highway`, `expressway`, `junction`, `informal`
-- **Detail**: `name`, `ref`, `surface`, `service`, `junction`, `dual_carriageway`, `motorroad`, `oneway`, `operator`, `website`, `access`, `motor_vehicle`, `bicycle`, `foot`, `wheelchair`, `dog`, `supervised`, `lit`, `smoothness`, `sac_scale`, `trail_visibility`, `mtb`, `mtb:scale`, `mtb:scale:imba`, `layer`, `bridge`, `tunnel`, `location`, `covered`, `indoor`
+- **Detail**: `name`, `ref`, `surface`, `service`, `junction`, `dual_carriageway`, `motorroad`, `oneway`, `operator`, `website`, `footway`, `crossing`, `crossing:markings`, `crossing:signals`, `crossing:signed`, `crossing:island`, `tactile_paving`, `button_operated`, `segregated`, `sidewalk`, `sidewalk:left`, `sidewalk:right`, `access`, `motor_vehicle`, `bicycle`, `foot`, `wheelchair`, `dog`, `supervised`, `lit`, `smoothness`, `sac_scale`, `trail_visibility`, `mtb`, `mtb:scale`, `mtb:scale:imba`, `layer`, `bridge`, `tunnel`, `location`, `covered`, `indoor`
 
 Notes
 - Connected highway segments with the same attributes are merged

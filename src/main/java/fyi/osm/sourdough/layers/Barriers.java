@@ -33,7 +33,7 @@ public class Barriers implements FeatureProcessor, LayerPostProcessor {
 
   public static final Set<String> DETAIL_TAGS = Utils.union(
     Constants.COMMON_DETAIL_TAGS,
-    Set.of("material", "height", "access", "wheelchair")
+    Set.of("material", "height", "access", "wheelchair", "tactile_paving")
   );
 
   @Override
