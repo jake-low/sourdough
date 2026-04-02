@@ -35,7 +35,23 @@ public class Waterways implements FeatureProcessor, LayerPostProcessor {
 
   public static final Set<String> DETAIL_TAGS = Utils.union(
     Constants.COMMON_DETAIL_TAGS,
-    Set.of("usage", "layer", "intermittent")
+    Set.of(
+      "usage",
+      "layer",
+      "bridge",
+      "tunnel",
+      "location",
+      "intermittent",
+      "seasonal",
+      "tidal",
+      "material",
+      "height",
+      "boat",
+      "motorboat",
+      "canoe",
+      "swimming",
+      "fishing"
+    )
   );
 
   @Override

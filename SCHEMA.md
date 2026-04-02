@@ -342,8 +342,8 @@ In Sourdough, this reconstructed ocean polygon is represented in the tiles as if
 
 ### Waterways
 
-The `waterways` layer contains features from OSM which are tagged `waterway=*`, including rivers, streams, and canals, as well as water-related infrastructure like dams and locks.
+The `waterways` layer contains features from OSM which are tagged `waterway=*`, including rivers, streams, and canals, as well as waterfalls and water-related infrastructure like dams and locks.
 
 **Attributes**:
 - **Primary**: `waterway`
-- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `usage`, `layer`, `intermittent`
+- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `usage`, `layer`, `bridge`, `tunnel`, `location`, `intermittent`, `seasonal`, `tidal`, `material`, `height`, `boat`, `motorboat`, `canoe`, `swimming`, `fishing`
