@@ -316,7 +316,7 @@ The `shops` layer contains features from OSM which are tagged `shop=*`, represen
 
 **Attributes**:
 - **Primary**: `shop`
-- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `access`, `wheelchair`, `toilets`, `brand`, `operator`, `beauty`, `clothes`, `male`, `female`, `unisex`, `level`, `indoor`, `cuisine`, `diet:vegetarian`, `diet:vegan`, `diet:halal`, `diet:kosher`, `diet:gluten_free`, `fair_trade`, `organic`, `second_hand`, `self_service`, `service:bicycle:pump`, `service:bicycle:repair`, `service:bicycle:retail`, `service:vehicle:car_repair`, `service:vehicle:tyres`, `trade`, `sport`
+- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `access`, `wheelchair`, `toilets`, `brand`, `operator`, `beauty`, `clothes`, `male`, `female`, `unisex`, `level`, `indoor`, `cuisine`, `diet:vegetarian`, `diet:vegan`, `diet:halal`, `diet:kosher`, `diet:gluten_free`, `fair_trade`, `organic`, `second_hand`, `self_service`, `service:bicycle:pump`, `service:bicycle:repair`, `service:bicycle:retail`, `service:vehicle:car_repair`, `service:vehicle:tyres`, `trade`, `sport`, `pet`
 
 ### Tourism
 

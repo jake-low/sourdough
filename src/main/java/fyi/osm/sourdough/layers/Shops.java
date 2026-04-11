@@ -47,6 +47,7 @@ public class Shops implements FeatureProcessor {
       "male",
       "operator",
       "organic",
+      "pet",
       "second_hand",
       "self_service",
       "service:bicycle:pump",
