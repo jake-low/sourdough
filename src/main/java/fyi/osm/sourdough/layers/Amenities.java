@@ -72,6 +72,7 @@ public class Amenities implements FeatureProcessor, LayerPostProcessor {
       "outdoor_seating",
       "parking",
       "parking_space",
+      "private",
       "recycling:cans",
       "recycling:clothes",
       "recycling:glass",
