@@ -326,7 +326,7 @@ This layer also contains features tagged `attraction=*`, which is used to map at
 
 **Attributes**:
 - **Primary**: `tourism`, `attraction`
-- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `attraction`, `museum`, `artwork_type`, `artist_name`, `information`, `board_type`, `board:title`, `access`, `wheelchair`, `level`, `toilets`, `fee`, `brand`, `operator`, `website`
+- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `attraction`, `museum`, `artwork_type`, `artist_name`, `information`, `board_type`, `board:title`, `access`, `wheelchair`, `level`, `toilets`, `fee`, `brand`, `operator`, `website`, `zoo`
 
 ### Water
 

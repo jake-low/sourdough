@@ -44,7 +44,8 @@ public class Tourism implements FeatureProcessor {
       "operator",
       "toilets",
       "website",
-      "wheelchair"
+      "wheelchair",
+      "zoo"
     )
   );
 
