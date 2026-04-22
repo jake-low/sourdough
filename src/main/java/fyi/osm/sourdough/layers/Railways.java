@@ -65,7 +65,19 @@ public class Railways implements FeatureProcessor, LayerPostProcessor {
       return;
     }
 
-    if (sf.canBePolygon()) {
+    var isArea =
+      sf.hasTag(
+        "railway",
+        "platform",
+        "station",
+        "roundhouse",
+        "traverser",
+        "turntable",
+        "workshop"
+      ) ||
+      sf.hasTag("area", "yes");
+
+    if (sf.canBePolygon() && isArea) {
       processRailwayArea(sf, fc);
     } else if (sf.canBeLine()) {
       processRailwayLine(sf, fc);
