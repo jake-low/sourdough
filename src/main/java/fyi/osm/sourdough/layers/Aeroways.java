@@ -127,8 +127,11 @@ public class Aeroways implements FeatureProcessor, LayerPostProcessor {
       } else {
         return 12;
       }
+    } else if (sf.hasTag("aeroway", "terminal")) {
+      return 13;
+    } else {
+      return 14;
     }
-    return 14;
   }
 
   @Override
