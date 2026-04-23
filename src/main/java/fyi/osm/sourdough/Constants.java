@@ -13,4 +13,20 @@ public class Constants {
     "wikidata",
     "wikipedia"
   );
+
+  public static final Set<String> LIFECYCLE_PREFIXES = Set.of(
+    // future
+    "proposed",
+    "planned",
+    "construction",
+    // past
+    "disused",
+    "abandoned",
+    "ruins",
+    "demolished",
+    "removed",
+    "razed",
+    "destroyed",
+    "was"
+  );
 }

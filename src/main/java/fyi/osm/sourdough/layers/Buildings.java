@@ -29,12 +29,26 @@ public class Buildings implements FeatureProcessor, LayerPostProcessor {
     return LAYER_NAME;
   }
 
-  public static final Set<String> PRIMARY_TAGS = Set.of(
+  private static final List<String> BUILDING_KEYS = Utils.withPrefixes(
     "building",
-    "building:part",
-    "entrance",
-    "indoor"
+    Constants.LIFECYCLE_PREFIXES
   );
+  private static final List<String> BUILDING_PART_KEYS = Utils.withPrefixes(
+    "building:part",
+    Constants.LIFECYCLE_PREFIXES
+  );
+  private static final List<String> ENTRANCE_KEYS = Utils.withPrefixes(
+    "entrance",
+    Constants.LIFECYCLE_PREFIXES
+  );
+
+  public static final Set<String> TOP_LEVEL_TAGS = Utils.union(
+    Set.copyOf(BUILDING_KEYS),
+    Set.copyOf(BUILDING_PART_KEYS),
+    Set.copyOf(ENTRANCE_KEYS)
+  );
+
+  public static final Set<String> PRIMARY_TAGS = Utils.union(TOP_LEVEL_TAGS, Set.of("indoor"));
 
   public static final Set<String> DETAIL_TAGS = Utils.union(
     Constants.COMMON_DETAIL_TAGS,
@@ -53,16 +67,13 @@ public class Buildings implements FeatureProcessor, LayerPostProcessor {
   @Override
   public Expression filter() {
     return Expression.or(
-      Expression.matchField("building"),
-      Expression.matchField("building:part"),
-      Expression.matchField("entrance")
-      //Expression.matchField("indoor")
+      TOP_LEVEL_TAGS.stream().map(Expression::matchField).toArray(Expression[]::new)
     );
   }
 
   @Override
   public void processFeature(SourceFeature sf, FeatureCollector fc) {
-    if (sf.hasTag("building")) {
+    if (Utils.hasAnyTag(sf, BUILDING_KEYS)) {
       if (sf.canBePolygon()) {
         processBuildingArea(sf, fc);
       } else if (sf.isPoint()) {
@@ -71,14 +82,14 @@ public class Buildings implements FeatureProcessor, LayerPostProcessor {
       return;
     }
 
-    if (sf.hasTag("building:part")) {
+    if (Utils.hasAnyTag(sf, BUILDING_PART_KEYS)) {
       if (sf.canBePolygon()) {
         processBuildingPartArea(sf, fc);
       }
       return;
     }
 
-    if (sf.hasTag("entrance")) {
+    if (Utils.hasAnyTag(sf, ENTRANCE_KEYS)) {
       if (sf.isPoint()) {
         processEntrancePoint(sf, fc);
       }

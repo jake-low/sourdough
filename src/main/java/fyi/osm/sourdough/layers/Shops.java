@@ -9,6 +9,7 @@ import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
 import fyi.osm.sourdough.util.Utils;
+import java.util.List;
 import java.util.Set;
 
 public class Shops implements FeatureProcessor {
@@ -25,7 +26,14 @@ public class Shops implements FeatureProcessor {
     return LAYER_NAME;
   }
 
-  public static final Set<String> PRIMARY_TAGS = Set.of("shop");
+  private static final List<String> SHOP_KEYS = Utils.withPrefixes(
+    "shop",
+    Constants.LIFECYCLE_PREFIXES
+  );
+
+  public static final Set<String> TOP_LEVEL_TAGS = Set.copyOf(SHOP_KEYS);
+
+  public static final Set<String> PRIMARY_TAGS = TOP_LEVEL_TAGS;
 
   public static final Set<String> DETAIL_TAGS = Utils.union(
     Constants.COMMON_DETAIL_TAGS,
@@ -65,7 +73,9 @@ public class Shops implements FeatureProcessor {
 
   @Override
   public Expression filter() {
-    return Expression.matchField("shop");
+    return Expression.or(
+      TOP_LEVEL_TAGS.stream().map(Expression::matchField).toArray(Expression[]::new)
+    );
   }
 
   @Override
@@ -105,7 +115,7 @@ public class Shops implements FeatureProcessor {
   }
 
   private int getLabelMinZoom(SourceFeature sf) {
-    return switch (sf.getString("shop")) {
+    return switch (Utils.getFirstTag(sf, SHOP_KEYS)) {
       case "supermarket", "department_store" -> 13;
       default -> 14;
     };

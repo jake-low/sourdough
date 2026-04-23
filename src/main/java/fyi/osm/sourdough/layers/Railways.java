@@ -29,7 +29,17 @@ public class Railways implements FeatureProcessor, LayerPostProcessor {
     return LAYER_NAME;
   }
 
-  public static final Set<String> PRIMARY_TAGS = Set.of("railway", "service", "usage");
+  private static final List<String> RAILWAY_KEYS = Utils.withPrefixes(
+    "railway",
+    Constants.LIFECYCLE_PREFIXES
+  );
+
+  public static final Set<String> TOP_LEVEL_TAGS = Set.copyOf(RAILWAY_KEYS);
+
+  public static final Set<String> PRIMARY_TAGS = Utils.union(
+    TOP_LEVEL_TAGS,
+    Set.of("service", "usage")
+  );
 
   // TODO: LAYER_TAGS should appear at fixed zoom (z12)
 
@@ -56,26 +66,22 @@ public class Railways implements FeatureProcessor, LayerPostProcessor {
 
   @Override
   public Expression filter() {
-    return Expression.matchField("railway");
+    return Expression.or(
+      TOP_LEVEL_TAGS.stream().map(Expression::matchField).toArray(Expression[]::new)
+    );
   }
 
   @Override
   public void processFeature(SourceFeature sf, FeatureCollector fc) {
-    if (sf.hasTag("railway", "construction", "proposed")) {
-      return;
-    }
-
+    var railway = Utils.getFirstTag(sf, RAILWAY_KEYS);
     var isArea =
-      sf.hasTag(
-        "railway",
-        "platform",
-        "station",
-        "roundhouse",
-        "traverser",
-        "turntable",
-        "workshop"
-      ) ||
-      sf.hasTag("area", "yes");
+      sf.hasTag("area", "yes") ||
+      "platform".equals(railway) ||
+      "station".equals(railway) ||
+      "roundhouse".equals(railway) ||
+      "traverser".equals(railway) ||
+      "turntable".equals(railway) ||
+      "workshop".equals(railway);
 
     if (sf.canBePolygon() && isArea) {
       processRailwayArea(sf, fc);
@@ -125,7 +131,7 @@ public class Railways implements FeatureProcessor, LayerPostProcessor {
   }
 
   private int getRailwayLineMinZoom(SourceFeature sf) {
-    String railway = sf.getString("railway");
+    String railway = Utils.getFirstTag(sf, RAILWAY_KEYS);
     String service = sf.getString("service");
     String usage = sf.getString("usage");
 
@@ -169,7 +175,7 @@ public class Railways implements FeatureProcessor, LayerPostProcessor {
   }
 
   private int getLabelMinZoom(SourceFeature sf) {
-    return switch (sf.getString("railway")) {
+    return switch (Utils.getFirstTag(sf, RAILWAY_KEYS)) {
       case "station" -> 10;
       case "halt" -> 11;
       case "stop", "tram_stop" -> 12;

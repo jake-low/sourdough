@@ -29,7 +29,14 @@ public class Amenities implements FeatureProcessor, LayerPostProcessor {
     return LAYER_NAME;
   }
 
-  public static final Set<String> PRIMARY_TAGS = Set.of("amenity");
+  private static final List<String> AMENITY_KEYS = Utils.withPrefixes(
+    "amenity",
+    Constants.LIFECYCLE_PREFIXES
+  );
+
+  public static final Set<String> TOP_LEVEL_TAGS = Set.copyOf(AMENITY_KEYS);
+
+  public static final Set<String> PRIMARY_TAGS = TOP_LEVEL_TAGS;
 
   public static final Set<String> DETAIL_TAGS = Utils.union(
     Constants.COMMON_DETAIL_TAGS,
@@ -103,7 +110,9 @@ public class Amenities implements FeatureProcessor, LayerPostProcessor {
 
   @Override
   public Expression filter() {
-    return Expression.matchField("amenity");
+    return Expression.or(
+      TOP_LEVEL_TAGS.stream().map(Expression::matchField).toArray(Expression[]::new)
+    );
   }
 
   @Override
@@ -145,7 +154,7 @@ public class Amenities implements FeatureProcessor, LayerPostProcessor {
   }
 
   private int getLabelMinZoom(SourceFeature sf) {
-    return switch (sf.getString("amenity")) {
+    return switch (Utils.getFirstTag(sf, AMENITY_KEYS)) {
       case "hospital", "university" -> 11;
       case
         "place_of_worship",

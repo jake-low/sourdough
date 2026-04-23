@@ -9,7 +9,9 @@ import com.onthegomap.planetiler.expression.Expression;
 import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
+import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.Utils;
 import java.util.*;
 
 public class Highways implements FeatureProcessor, LayerPostProcessor {
@@ -26,11 +28,23 @@ public class Highways implements FeatureProcessor, LayerPostProcessor {
     return LAYER_NAME;
   }
 
-  public static final Set<String> PRIMARY_TAGS = Set.of(
+  private static final List<String> HIGHWAY_KEYS = Utils.withPrefixes(
     "highway",
-    "expressway",
+    Constants.LIFECYCLE_PREFIXES
+  );
+  private static final List<String> JUNCTION_KEYS = Utils.withPrefixes(
     "junction",
-    "informal"
+    Constants.LIFECYCLE_PREFIXES
+  );
+
+  public static final Set<String> TOP_LEVEL_TAGS = Utils.union(
+    Set.copyOf(HIGHWAY_KEYS),
+    Set.copyOf(JUNCTION_KEYS)
+  );
+
+  public static final Set<String> PRIMARY_TAGS = Utils.union(
+    TOP_LEVEL_TAGS,
+    Set.of("expressway", "informal", "construction", "proposed")
   );
 
   public static final Set<String> LABEL_TAGS = Set.of("name", "ref", "surface");
@@ -82,17 +96,17 @@ public class Highways implements FeatureProcessor, LayerPostProcessor {
 
   @Override
   public Expression filter() {
-    return Expression.or(Expression.matchField("highway"), Expression.matchField("junction"));
+    return Expression.or(
+      TOP_LEVEL_TAGS.stream().map(Expression::matchField).toArray(Expression[]::new)
+    );
   }
 
   @Override
   public void processFeature(SourceFeature sf, FeatureCollector fc) {
-    if (sf.hasTag("highway")) {
-      if (sf.hasTag("highway", "proposed", "construction")) {
-        return;
-      }
-
-      var isArea = sf.hasTag("area", "yes") || sf.hasTag("highway", "rest_area", "services");
+    if (Utils.hasAnyTag(sf, HIGHWAY_KEYS)) {
+      var highway = Utils.getFirstTag(sf, HIGHWAY_KEYS);
+      var isArea =
+        sf.hasTag("area", "yes") || "rest_area".equals(highway) || "services".equals(highway);
 
       if (sf.canBeLine() && !isArea) {
         this.processHighwayLine(sf, fc);
@@ -101,7 +115,7 @@ public class Highways implements FeatureProcessor, LayerPostProcessor {
       } else if (sf.isPoint()) {
         this.processHighwayPoint(sf, fc);
       }
-    } else if (sf.hasTag("junction")) {
+    } else if (Utils.hasAnyTag(sf, JUNCTION_KEYS)) {
       if (sf.isPoint()) {
         this.processJunctionPoint(sf, fc);
       }
@@ -177,12 +191,21 @@ public class Highways implements FeatureProcessor, LayerPostProcessor {
     }
   }
 
+  private static String effectiveHighwayClass(SourceFeature sf) {
+    var value = sf.getString("highway");
+    if ("construction".equals(value) || "proposed".equals(value)) {
+      var inner = sf.getString(value);
+      if (inner != null) return inner;
+    }
+    return Utils.getFirstTag(sf, HIGHWAY_KEYS);
+  }
+
   private int getHighwayLineMinZoom(SourceFeature sf) {
     if (sf.hasTag("footway", "sidewalk", "crossing")) return 14;
     if (sf.hasTag("service", "driveway", "parking_aisle")) return 14;
     if (sf.hasTag("indoor", "yes")) return 14;
 
-    return switch (sf.getString("highway")) {
+    var zoom = switch (effectiveHighwayClass(sf)) {
       case "motorway", "motorway_link" -> 3;
       case "trunk", "trunk_link" -> sf.hasTag("expressway", "yes") ? 3 : 4;
       case "primary", "primary_link" -> 7;
@@ -191,16 +214,21 @@ public class Highways implements FeatureProcessor, LayerPostProcessor {
       case "residential", "unclassified" -> 11;
       case "trailhead" -> 11;
       case "track", "path", "footway", "cycleway", "bridleway" -> (sf.hasTag("name") &&
-          !sf.hasTag("informal", "yes"))
+        !sf.hasTag("informal", "yes"))
         ? 11
         : 12;
       case "service", "busway", "pedestrian", "living_street" -> 12;
       default -> 12;
     };
+
+    if (sf.hasTag("highway", "construction", "proposed")) {
+      zoom = Math.max(10, zoom + 1);
+    }
+    return zoom;
   }
 
   private int getLabelMinZoom(SourceFeature sf) {
-    return switch (sf.getString("highway")) {
+    return switch (effectiveHighwayClass(sf)) {
       case "trailhead" -> 11;
       case "turning_circle", "turning_loop" -> 14;
       default -> 15;
