@@ -6,9 +6,9 @@ import com.onthegomap.planetiler.ForwardingProfile.FeatureProcessor;
 import com.onthegomap.planetiler.ForwardingProfile.LayerPostProcessor;
 import com.onthegomap.planetiler.ForwardingProfile.OsmRelationPreprocessor;
 import com.onthegomap.planetiler.VectorTile;
-import com.onthegomap.planetiler.expression.Expression;
 import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SourceFeature;
+import com.onthegomap.planetiler.reader.WithTags;
 import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.reader.osm.OsmReader;
 import com.onthegomap.planetiler.reader.osm.OsmRelationInfo;
@@ -33,13 +33,12 @@ public class Routes implements FeatureProcessor, LayerPostProcessor, OsmRelation
     return LAYER_NAME;
   }
 
-  public static final Set<String> PRIMARY_TAGS = Set.of("route");
+  public static final Set<String> PRIMARY_TAGS = Set.of("route", "ref", "network");
 
   // FIXME: most of these are unused, since RouteRecord does not store them
   public static final Set<String> DETAIL_TAGS = Utils.union(
     Constants.COMMON_DETAIL_TAGS,
     Set.of(
-      "network",
       "operator",
       "from",
       "to",
@@ -59,6 +58,7 @@ public class Routes implements FeatureProcessor, LayerPostProcessor, OsmRelation
 
   private record RouteRecord(
     long id,
+    int minZoom,
     String route,
     String network,
     String ref,
@@ -78,14 +78,10 @@ public class Routes implements FeatureProcessor, LayerPostProcessor, OsmRelation
       return null;
     }
 
-    // FIXME: right? we want these?
-    if (relation.hasTag("route", "road")) {
-      return null;
-    }
-
     return List.of(
       new RouteRecord(
         relation.id(),
+        getRouteMinZoom(relation),
         relation.getString("route"),
         relation.getString("network"),
         relation.getString("ref"),
@@ -120,7 +116,7 @@ public class Routes implements FeatureProcessor, LayerPostProcessor, OsmRelation
     // Process each route relation that this way is part of
     for (var routeMember : routes) {
       var route = routeMember.relation();
-      var minZoom = getRouteMinZoom(route.route);
+      var minZoom = route.minZoom;
       var detailMinZoom = Math.min(minZoom + 2, 14);
 
       var line = fc.line(this.name());
@@ -129,26 +125,22 @@ public class Routes implements FeatureProcessor, LayerPostProcessor, OsmRelation
       line.setMinPixelSize(0);
       line.setBufferPixels(8);
 
+      // primary tags
       line.setAttr("route", route.route);
-      // line.setAttr("name", route.name);
-      // line.setAttr("ref", route.ref);
-      // line.setAttr("network", route.network);
-      // line.setAttr("operator", route.operator);
+      line.setAttr("ref", route.ref);
+      line.setAttr("network", route.network);
 
+      // detail tags (TODO add the rest)
       line.setAttrWithMinzoom("name", route.name, detailMinZoom);
-      line.setAttrWithMinzoom("ref", route.ref, detailMinZoom);
-      line.setAttrWithMinzoom("network", route.network, detailMinZoom);
       line.setAttrWithMinzoom("operator", route.operator, detailMinZoom);
       line.setAttrWithMinzoom("colour", route.colour, detailMinZoom);
 
-      // Add detail attributes from the way itself at higher zoom levels
-      // var detailMinZoom = Math.min(minZoom + 3, 15);
-      // AttributeProcessor.setAttributesWithMinzoom(sf, line, DETAIL_TAGS, detailMinZoom);
+      // FIXME: 'name' attribute above doesn't respect --language setting
     }
   }
 
   private void processRouteWay(SourceFeature sf, FeatureCollector fc) {
-    var minZoom = getLabelMinZoom(sf);
+    var minZoom = getRouteMinZoom(sf);
     var detailMinZoom = Math.min(minZoom + 2, 14);
 
     var line = fc.line(this.name());
@@ -160,17 +152,13 @@ public class Routes implements FeatureProcessor, LayerPostProcessor, OsmRelation
     AttributeProcessor.setAttributesWithMinzoom(sf, line, DETAIL_TAGS, detailMinZoom, config);
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
-    return getRouteMinZoom(sf.getString("route"));
-  }
-
-  private int getRouteMinZoom(String routeType) {
-    if (routeType == null) return 12;
-
-    return switch (routeType) {
-      case "road", "train", "waterway" -> 6;
+  private int getRouteMinZoom(WithTags route) {
+    return switch (route.getString("route")) {
+      case "road" -> route.getString("network") != null ? 6 : 11;
+      case "train", "waterway" -> 6;
       case "ferry", "subway", "light_rail", "railway" -> 8;
-      case "bus", "trolleybus", "tram", "monorail", "funicular", "share_taxi" -> 9;
+      case "tram", "monorail" -> 9;
+      case "bus", "trolleybus", "funicular", "share_taxi" -> 10;
       case "hiking", "bicycle", "foot", "mtb" -> 10;
       case "horse", "canoe", "snowmobile", "running", "fitness_trail", "ski", "piste" -> 12;
       default -> 13;
