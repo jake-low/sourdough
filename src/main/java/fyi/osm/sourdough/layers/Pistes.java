@@ -29,7 +29,15 @@ public class Pistes implements FeatureProcessor {
 
   public static final Set<String> DETAIL_TAGS = Utils.union(
     Constants.COMMON_DETAIL_TAGS,
-    Set.of("piste:grooming", "piste:name", "operator", "access", "informal", "website")
+    Set.of(
+      "piste:difficulty",
+      "piste:grooming",
+      "piste:name",
+      "operator",
+      "access",
+      "informal",
+      "website"
+    )
   );
 
   @Override

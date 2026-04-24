@@ -264,7 +264,7 @@ The `pistes` layer contains features from OSM which are tagged `piste:type=*`, i
 
 **Attributes**:
 - **Primary**: `piste:type`
-- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `piste:grooming`, `piste:name`, `operator`, `access`, `informal`, `website`
+- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `piste:difficulty`, `piste:grooming`, `piste:name`, `operator`, `access`, `informal`, `website`
 
 ### Places
 
