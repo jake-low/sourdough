@@ -55,6 +55,7 @@ public class Railways implements FeatureProcessor, LayerPostProcessor {
       "ref",
       "railway:track_ref",
       "public_transport",
+      "station",
       "train",
       "subway",
       "tram",

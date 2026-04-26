@@ -300,7 +300,7 @@ The `railways` layer contains features from OSM which are tagged `railway=*`, in
 
 **Attributes**:
 - **Primary**: `railway`, `service`, `usage`
-- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `operator`, `gauge`, `electrified`, `frequency`, `voltage`, `maxspeed`, `railway:track_ref`, `public_transport`, `train`, `subway`, `tram`, `bridge`, `tunnel`, `layer`
+- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `operator`, `gauge`, `electrified`, `frequency`, `voltage`, `maxspeed`, `railway:track_ref`, `public_transport`, `station`, `train`, `subway`, `tram`, `bridge`, `tunnel`, `layer`
 
 ### Routes
 
