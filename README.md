@@ -15,7 +15,7 @@ You can see a demo of Sourdough at [sourdough.osm.fyi](https://sourdough.osm.fyi
 
 These goals come with some trade-offs:
 - Because Sourdough tiles are meant to be flexible for many different types of maps, they contain a lot of data, and may be larger (and make your map load more slowly for your users) than tiles from other schemas.
-- Since Sourdough aims to be a simple and direct representation of OSM data, it leaves it to map-makers to handle [synonymous tags], [troll tags], and other idiosyncracies in OSM's data model.
+- Since Sourdough aims to be a simple and direct representation of OSM data, it leaves it to map-makers to handle [synonymous tags], [troll tags], and other idiosyncrasies in OSM's data model.
 - Some popular cartographic effects (like placing curved text labels along lakes, or clustering nearby points of interest) require making opinionated decisions about how to transform the raw input data during tile generation. Sourdough aims to be a direct and naïve transformation of OSM data into vector tiles, so it avoids implementing these features, which means some effects are not possible (unless you modify the code yourself to add them).
 
 ## Getting started
