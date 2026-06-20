@@ -127,6 +127,11 @@ public class Builder extends ForwardingProfile {
       "language code for name substitution (e.g. 'es' for Spanish)",
       null
     );
+    List<String> additionalLanguages = args.getList(
+      "additional_languages",
+      "list of additional languages to include as separate attributes (e.g. 'fr,de,es')",
+      List.of()
+    );
 
     var planetiler = Planetiler.create(args)
       .addOsmSource("osm", Path.of("data", "sources", area + ".osm.pbf"), "geofabrik:" + area)
@@ -136,7 +141,7 @@ public class Builder extends ForwardingProfile {
         "https://osmdata.openstreetmap.de/download/water-polygons-split-3857.zip"
       );
 
-    var config = new Configuration(language);
+    var config = new Configuration(language, additionalLanguages);
     planetiler.setProfile(new Builder(config)).setOutput("data/sourdough.pmtiles").run();
   }
 }

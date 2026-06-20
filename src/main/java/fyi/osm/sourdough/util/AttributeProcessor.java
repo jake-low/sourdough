@@ -4,6 +4,7 @@ import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.util.Parse;
 import fyi.osm.sourdough.Configuration;
+import fyi.osm.sourdough.Constants;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,6 +61,7 @@ public class AttributeProcessor {
         var parsed = parse(value, type);
         feature.setAttr(key, parsed);
       }
+      setAdditionalLanguageAttrs(sf, feature, key, null, config);
     }
   }
 
@@ -77,17 +79,44 @@ public class AttributeProcessor {
         var parsed = parse(value, type);
         feature.setAttrWithMinzoom(key, parsed, minZoom);
       }
+      setAdditionalLanguageAttrs(sf, feature, key, minZoom, config);
     }
   }
 
   private static String getValue(SourceFeature sf, String key, Configuration config) {
-    if ("name".equals(key) && config.hasLanguage()) {
-      String localizedName = sf.getString("name:" + config.language());
+    if (config.hasLanguage() && Constants.LOCALIZABLE_NAME_KEYS.contains(key)) {
+      String localizedName = sf.getString(key + ":" + config.language());
       if (localizedName != null) {
         return localizedName;
       }
     }
     return sf.getString(key);
+  }
+
+  // Emit language-suffixed variants of the given tag key for each language listed
+  // in --additional-languages (if the feature has no name tag in a given language,
+  // no attribute is emitted).
+  private static void setAdditionalLanguageAttrs(
+    SourceFeature sf,
+    FeatureCollector.Feature feature,
+    String key,
+    Integer minZoom,
+    Configuration config
+  ) {
+    if (!config.hasAdditionalLanguages() || !Constants.LOCALIZABLE_NAME_KEYS.contains(key)) {
+      return;
+    }
+    for (var language : config.additionalLanguages()) {
+      var suffixedKey = key + ":" + language;
+      var value = sf.getString(suffixedKey);
+      if (value != null) {
+        if (minZoom == null) {
+          feature.setAttr(suffixedKey, value);
+        } else {
+          feature.setAttrWithMinzoom(suffixedKey, value, minZoom);
+        }
+      }
+    }
   }
 
   private static Object parseBoolOrNull(String value) {

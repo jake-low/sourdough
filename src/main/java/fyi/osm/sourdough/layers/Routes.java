@@ -135,7 +135,8 @@ public class Routes implements FeatureProcessor, LayerPostProcessor, OsmRelation
       line.setAttrWithMinzoom("operator", route.operator, detailMinZoom);
       line.setAttrWithMinzoom("colour", route.colour, detailMinZoom);
 
-      // FIXME: 'name' attribute above doesn't respect --language setting
+      // FIXME: 'name' attribute above doesn't respect --language setting, and routes
+      // layer currently ignores --additional-languages option too.
     }
   }
 

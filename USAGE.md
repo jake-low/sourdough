@@ -40,9 +40,13 @@ java -jar target/sourdough-builder-HEAD-with-deps.jar \
 
 ### Sourdough-specific arguments
 
-- `--language <code>` - Change the preferred language for `name` attributes on tile features. When not set, a feature's `name` will be equal to the value of the `name` tag on the corresponding OSM element. But if you set `--language fr`, then the `name` tag will be equal to the value of the `name:fr` tag if one is present, and fall back to the `name` tag if it isn't.
+- `--language <code>` - Change the preferred language for `name` attributes on tile features. When not set, a feature's `name` will be equal to the value of the `name` tag on the corresponding OSM element. But if you set `--language fr`, then the `name` tag will be equal to the value of the `name:fr` tag if one is present, and fall back to the `name` tag if it isn't. The same substitution is applied to the other name attributes (`alt_name`, `short_name`, and `official_name`).
 
    Basically, if you want your map labels to be in the local language (matching OSM's convention for what goes in the `name` tag), then don't use this option. But if you want your map labels to be in a specific language whenever possible (no matter where in the world you're looking at), then use the `--language` option to specify your desired language, and names in that language will be preferred when they are available in OSM.
+
+- `--additional-languages <codes>` - Include additional alternate-language names as separate suffixed attributes. Accepts a comma-separated list of language codes, e.g. `--additional-languages fr,de,es`. For each feature, the value of each available `name:<code>` tag in OSM is copied into a matching `name:<code>` attribute on the tile feature (and likewise for `alt_name:<code>`, `short_name:<code>`, and `official_name:<code>`, if present).
+
+   This is independent of the `--language` option: `--language` controls which language fills the singular `name` attribute, while `--additional-languages` adds extra per-language attributes. Use `--additional-languages` when you want a multilingual tileset whose display language can be switched at runtime by the stylesheet (similar to [OpenStreetMap Americana](https://americanamap.org/)). Note that including lots of languages increases the tile size.
 
 ## Deploying and serving tiles
 
