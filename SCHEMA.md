@@ -121,7 +121,7 @@ This layer also contains features tagged `building:part=*` (representing parts o
 
 **Attributes**:
 - **Primary**: `building`, `building:part`, `entrance`
-- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `height`, `building:levels`, `building:levels:underground`, `building:material`, `roof:material`, `layer`, `level`
+- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `height`, `building:levels`, `building:levels:underground`, `building:material`, `building:colour`, `roof:shape`, `roof:material`, `roof:colour`, `layer`, `level`
 
 Notes
 - Heights are quantized at lower zooms to reduce tile sizes

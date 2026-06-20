@@ -57,7 +57,10 @@ public class Buildings implements FeatureProcessor, LayerPostProcessor {
       "building:levels",
       "building:levels:underground",
       "building:material",
+      "building:colour",
+      "roof:shape",
       "roof:material",
+      "roof:colour",
       "layer",
       "level",
       "location"
