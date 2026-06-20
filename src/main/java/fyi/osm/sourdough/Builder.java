@@ -102,7 +102,7 @@ public class Builder extends ForwardingProfile {
 
   @Override
   public String version() {
-    return "0.2.0";
+    return "0.3.0";
   }
 
   @Override
