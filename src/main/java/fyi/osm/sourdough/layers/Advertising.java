@@ -7,6 +7,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.Set;
 
@@ -67,12 +68,7 @@ public class Advertising implements FeatureProcessor {
     var detailMinZoom = Math.min(15, polygon.getMinZoomForPixelSize(32));
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
-    var point = fc.pointOnSurface(this.name());
-    point.setMinZoom(detailMinZoom);
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createLabelPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
   private void processAdvertisingLine(SourceFeature sf, FeatureCollector fc) {
@@ -88,15 +84,10 @@ public class Advertising implements FeatureProcessor {
   }
 
   private void processAdvertisingPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
-    return 15;
+  private LabelZooms getLabelZooms(SourceFeature sf) {
+    return new LabelZooms(15, 16);
   }
 }

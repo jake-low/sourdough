@@ -11,6 +11,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.List;
 import java.util.Set;
@@ -84,12 +85,7 @@ public class Waterways implements FeatureProcessor, LayerPostProcessor {
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
     if (sf.hasTag("name")) {
-      var label = fc.pointOnSurface(this.name());
-      label.setMinZoom(detailMinZoom);
-      label.setBufferPixels(32);
-
-      AttributeProcessor.setAttributes(sf, label, PRIMARY_TAGS, config);
-      AttributeProcessor.setAttributes(sf, label, DETAIL_TAGS, config);
+      Utils.createLabelPoint(sf, fc, this.name(), new LabelZooms(14, 16), PRIMARY_TAGS, DETAIL_TAGS, config);
     }
   }
 
@@ -106,12 +102,7 @@ public class Waterways implements FeatureProcessor, LayerPostProcessor {
   }
 
   private void processWaterwayPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
   private int getWaterwayLineMinZoom(SourceFeature sf) {
@@ -121,12 +112,12 @@ public class Waterways implements FeatureProcessor, LayerPostProcessor {
     };
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
+  private LabelZooms getLabelZooms(SourceFeature sf) {
     return switch (sf.getString("waterway")) {
-      case "waterfall", "dam" -> 11;
-      case "lock_gate", "weir", "sluice_gate" -> 12;
-      case "rapids", "waterhole" -> 13;
-      default -> 14;
+      case "waterfall", "dam" -> new LabelZooms(11, 12);
+      case "lock_gate", "weir", "sluice_gate" -> new LabelZooms(12, 14);
+      case "rapids", "waterhole" -> new LabelZooms(13, 14);
+      default -> new LabelZooms(14, 15);
     };
   }
 

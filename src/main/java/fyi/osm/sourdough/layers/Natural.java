@@ -12,6 +12,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.List;
 import java.util.Set;
@@ -83,16 +84,11 @@ public class Natural implements FeatureProcessor, LayerPostProcessor {
 
     AttributeProcessor.setAttributes(sf, polygon, PRIMARY_TAGS, config);
 
-    var detailMinZoom = Math.min(getLabelMinZoom(sf), polygon.getMinZoomForPixelSize(32));
+    var detailMinZoom = Math.min(getLabelZooms(sf).min(), polygon.getMinZoomForPixelSize(32));
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
     if (sf.hasTag("name")) {
-      var label = fc.pointOnSurface(this.name());
-      label.setMinZoom(detailMinZoom);
-      label.setBufferPixels(32);
-
-      AttributeProcessor.setAttributes(sf, label, PRIMARY_TAGS, config);
-      AttributeProcessor.setAttributes(sf, label, DETAIL_TAGS, config);
+      Utils.createLabelPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
     }
   }
 
@@ -108,25 +104,38 @@ public class Natural implements FeatureProcessor, LayerPostProcessor {
   }
 
   private void processNaturalPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
   private int getLineMinZoom(SourceFeature sf) {
     return 10; // TODO
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
+  private LabelZooms getLabelZooms(SourceFeature sf) {
     return switch (sf.getString("natural")) {
-      case "peak", "volcano" -> sf.hasTag("name") ? 10 : 11;
-      case "bay", "spring", "strait" -> 12;
-      case "cave_entrance", "saddle" -> 13;
-      case "tree", "shrub", "stone" -> sf.hasTag("name") ? 14 : 15;
-      default -> 14;
+      case "peak", "volcano" -> sf.hasTag("name")
+        ? new LabelZooms(10, 11)
+        : new LabelZooms(11, 12);
+      case "bay", "spring", "strait" -> new LabelZooms(12, 13);
+      case "cave_entrance", "saddle" -> new LabelZooms(13, 14);
+      case "tree", "shrub", "stone" -> sf.hasTag("name")
+        ? new LabelZooms(14, 16)
+        : new LabelZooms(15, 17);
+      case
+        "wood",
+        "scrub",
+        "heath",
+        "wetland",
+        "beach",
+        "glacier",
+        "sand",
+        "grassland",
+        "bare_rock",
+        "scree",
+        "shingle",
+        "fell",
+        "tundra" -> new LabelZooms(14, 17);
+      default -> new LabelZooms(14, 15);
     };
   }
 

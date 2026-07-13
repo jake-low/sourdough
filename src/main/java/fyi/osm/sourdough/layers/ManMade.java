@@ -12,6 +12,7 @@ import com.onthegomap.planetiler.util.Parse;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.List;
 import java.util.Set;
@@ -75,15 +76,10 @@ public class ManMade implements FeatureProcessor, LayerPostProcessor {
 
     AttributeProcessor.setAttributes(sf, polygon, PRIMARY_TAGS, config);
 
-    var detailMinZoom = Math.min(getLabelMinZoom(sf), polygon.getMinZoomForPixelSize(32));
+    var detailMinZoom = Math.min(getLabelZooms(sf).min(), polygon.getMinZoomForPixelSize(32));
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
-    var label = fc.pointOnSurface(this.name());
-    label.setMinZoom(detailMinZoom);
-    label.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, label, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, label, DETAIL_TAGS, config);
+    Utils.createLabelPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
   private void processManmadeLine(SourceFeature sf, FeatureCollector fc) {
@@ -100,12 +96,7 @@ public class ManMade implements FeatureProcessor, LayerPostProcessor {
   }
 
   private void processManmadePoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
   private int getLineMinZoom(SourceFeature sf) {
@@ -144,13 +135,16 @@ public class ManMade implements FeatureProcessor, LayerPostProcessor {
     };
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
+  private LabelZooms getLabelZooms(SourceFeature sf) {
     return switch (sf.getString("man_made")) {
-      case "tower", "communications_tower", "telescope" -> 12;
-      case "mast" -> sf.hasTag("tower:type", "lighting") ? 14 : 12;
-      case "lighthouse", "water_tower", "windmill", "silo", "storage_tank" -> 13;
-      case "chimney", "crane", "cross", "obelisk", "monitoring_station" -> 14;
-      default -> 15;
+      case "tower", "communications_tower", "telescope" -> new LabelZooms(12, 14);
+      case "mast" -> sf.hasTag("tower:type", "lighting")
+        ? new LabelZooms(14, 16)
+        : new LabelZooms(12, 14);
+      case "lighthouse", "water_tower", "windmill", "silo", "storage_tank" ->
+        new LabelZooms(13, 14);
+      case "chimney", "crane", "cross", "obelisk", "monitoring_station" -> new LabelZooms(14, 15);
+      default -> new LabelZooms(15, 16);
     };
   }
 

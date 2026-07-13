@@ -11,6 +11,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.List;
 import java.util.Set;
@@ -95,7 +96,7 @@ public class Leisure implements FeatureProcessor, LayerPostProcessor {
 
   private void processLeisureArea(SourceFeature sf, FeatureCollector fc) {
     var polygon = fc.polygon(this.name());
-    polygon.setZoomRange(2, 15);
+    polygon.setMinZoom(2);
     polygon.setMinPixelSize(2.0);
 
     AttributeProcessor.setAttributes(sf, polygon, PRIMARY_TAGS, config);
@@ -104,18 +105,13 @@ public class Leisure implements FeatureProcessor, LayerPostProcessor {
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
     if (sf.hasTag("name") || sf.hasTag("ref")) {
-      var label = fc.pointOnSurface(this.name());
-      label.setMinZoom(Math.min(getLabelMinZoom(sf), detailMinZoom));
-      label.setBufferPixels(32);
-
-      AttributeProcessor.setAttributes(sf, label, PRIMARY_TAGS, config);
-      AttributeProcessor.setAttributes(sf, label, DETAIL_TAGS, config);
+      Utils.createLabelPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
     }
   }
 
   private void processLeisureLine(SourceFeature sf, FeatureCollector fc) {
     var line = fc.line(this.name());
-    line.setZoomRange(2, 15);
+    line.setMinZoom(2);
     line.setMinPixelSize(16.0);
 
     AttributeProcessor.setAttributes(sf, line, PRIMARY_TAGS, config);
@@ -125,17 +121,12 @@ public class Leisure implements FeatureProcessor, LayerPostProcessor {
   }
 
   private void processLeisurePoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
   private void processPlaygroundArea(SourceFeature sf, FeatureCollector fc) {
     var polygon = fc.polygon(this.name());
-    polygon.setZoomRange(13, 15);
+    polygon.setMinZoom(13);
     polygon.setMinPixelSize(1.0);
 
     AttributeProcessor.setAttributes(sf, polygon, PRIMARY_TAGS, config);
@@ -144,18 +135,13 @@ public class Leisure implements FeatureProcessor, LayerPostProcessor {
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
     if (sf.hasTag("name") || sf.hasTag("ref")) {
-      var label = fc.pointOnSurface(this.name());
-      label.setMinZoom(Math.min(15, detailMinZoom));
-      label.setBufferPixels(32);
-
-      AttributeProcessor.setAttributes(sf, label, PRIMARY_TAGS, config);
-      AttributeProcessor.setAttributes(sf, label, DETAIL_TAGS, config);
+      Utils.createLabelPoint(sf, fc, this.name(), new LabelZooms(14, 17), PRIMARY_TAGS, DETAIL_TAGS, config);
     }
   }
 
   private void processPlaygroundLine(SourceFeature sf, FeatureCollector fc) {
     var line = fc.line(this.name());
-    line.setZoomRange(14, 15);
+    line.setMinZoom(14);
     line.setMinPixelSize(8.0);
 
     AttributeProcessor.setAttributes(sf, line, PRIMARY_TAGS, config);
@@ -165,17 +151,12 @@ public class Leisure implements FeatureProcessor, LayerPostProcessor {
   }
 
   private void processPlaygroundPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(15);
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), new LabelZooms(15, 17), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
   private void processGolfArea(SourceFeature sf, FeatureCollector fc) {
     var polygon = fc.polygon(this.name());
-    polygon.setZoomRange(13, 15);
+    polygon.setMinZoom(13);
     polygon.setMinPixelSize(1.0);
 
     AttributeProcessor.setAttributes(sf, polygon, PRIMARY_TAGS, config);
@@ -184,18 +165,13 @@ public class Leisure implements FeatureProcessor, LayerPostProcessor {
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
     if (sf.hasTag("name") || sf.hasTag("ref")) {
-      var label = fc.pointOnSurface(this.name());
-      label.setMinZoom(Math.min(15, detailMinZoom));
-      label.setBufferPixels(32);
-
-      AttributeProcessor.setAttributes(sf, label, PRIMARY_TAGS, config);
-      AttributeProcessor.setAttributes(sf, label, DETAIL_TAGS, config);
+      Utils.createLabelPoint(sf, fc, this.name(), new LabelZooms(15, 16), PRIMARY_TAGS, DETAIL_TAGS, config);
     }
   }
 
   private void processGolfLine(SourceFeature sf, FeatureCollector fc) {
     var line = fc.line(this.name());
-    line.setZoomRange(14, 15);
+    line.setMinZoom(14);
     line.setMinPixelSize(8.0);
 
     AttributeProcessor.setAttributes(sf, line, PRIMARY_TAGS, config);
@@ -205,19 +181,14 @@ public class Leisure implements FeatureProcessor, LayerPostProcessor {
   }
 
   private void processGolfPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(15);
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), new LabelZooms(15, 17), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
+  private LabelZooms getLabelZooms(SourceFeature sf) {
     return switch (sf.getString("leisure")) {
-      case "nature_reserve", "park", "garden", "common" -> 13;
-      case "stadium", "marina", "golf_course", "beach_resort" -> 13;
-      case "playground", "track", "slipway" -> 14;
+      case "nature_reserve", "park", "garden", "common" -> new LabelZooms(14, 17);
+      case "stadium", "marina", "golf_course", "beach_resort" -> new LabelZooms(12, 14);
+      case "playground", "track", "slipway" -> new LabelZooms(14, 16);
       case
         "fitness_center",
         "resort",
@@ -227,8 +198,8 @@ public class Leisure implements FeatureProcessor, LayerPostProcessor {
         "amusement_arcade",
         "sports_hall",
         "dog_park",
-        "horse_riding" -> 14;
-      default -> 15;
+        "horse_riding" -> new LabelZooms(14, 15);
+      default -> new LabelZooms(15, 16);
     };
   }
 

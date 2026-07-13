@@ -11,6 +11,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.List;
 import java.util.Set;
@@ -76,16 +77,11 @@ public class Power implements FeatureProcessor, LayerPostProcessor {
 
     AttributeProcessor.setAttributes(sf, polygon, PRIMARY_TAGS, config);
 
-    var detailMinZoom = Math.min(getLabelMinZoom(sf), polygon.getMinZoomForPixelSize(32));
+    var detailMinZoom = Math.min(getLabelZooms(sf).min(), polygon.getMinZoomForPixelSize(32));
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
     if (sf.hasTag("name") || sf.hasTag("ref")) {
-      var point = fc.pointOnSurface(this.name());
-      point.setMinZoom(detailMinZoom);
-      point.setBufferPixels(32);
-
-      AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-      AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+      Utils.createLabelPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
     }
   }
 
@@ -101,12 +97,7 @@ public class Power implements FeatureProcessor, LayerPostProcessor {
   }
 
   private void processPowerPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
   private int getPowerLineMinZoom(SourceFeature sf) {
@@ -161,17 +152,21 @@ public class Power implements FeatureProcessor, LayerPostProcessor {
     return maxVoltage;
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
+  private LabelZooms getLabelZooms(SourceFeature sf) {
     return switch (sf.getString("power")) {
-      case "plant" -> getPlantMinZoom(sf);
-      case "tower", "substation" -> 12;
+      case "plant" -> {
+        var minZoom = getPlantMinZoom(sf);
+        yield new LabelZooms(minZoom, minZoom + 3);
+      }
+      case "substation" -> new LabelZooms(12, 14);
+      case "tower" -> new LabelZooms(12, 15);
       case "generator" -> switch (sf.getString("generator:source")) {
-        case "wind" -> 13;
-        case null -> 15;
-        default -> 15;
+        case "wind" -> new LabelZooms(13, 14);
+        case null -> new LabelZooms(15, 16);
+        default -> new LabelZooms(15, 16);
       };
-      case "pole", "transformer" -> 14;
-      default -> 14;
+      case "pole", "transformer" -> new LabelZooms(14, 16);
+      default -> new LabelZooms(14, 15);
     };
   }
 

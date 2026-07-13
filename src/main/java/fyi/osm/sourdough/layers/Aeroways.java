@@ -11,6 +11,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.List;
 import java.util.Set;
@@ -78,14 +79,7 @@ public class Aeroways implements FeatureProcessor, LayerPostProcessor {
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
     if (sf.hasTag("name")) {
-      var labelMinZoom = Math.min(getLabelMinZoom(sf), detailMinZoom);
-
-      var label = fc.pointOnSurface(this.name());
-      label.setMinZoom(labelMinZoom);
-      label.setBufferPixels(32);
-
-      AttributeProcessor.setAttributes(sf, label, PRIMARY_TAGS, config);
-      AttributeProcessor.setAttributes(sf, label, DETAIL_TAGS, config);
+      Utils.createLabelPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
     }
   }
 
@@ -97,40 +91,29 @@ public class Aeroways implements FeatureProcessor, LayerPostProcessor {
     AttributeProcessor.setAttributes(sf, line, DETAIL_TAGS, config);
 
     if (sf.hasTag("name")) {
-      var labelMinZoom = Math.min(this.getLabelMinZoom(sf), line.getMinZoomForPixelSize(32));
-
-      var label = fc.pointOnSurface(this.name());
-      label.setMinZoom(labelMinZoom);
-      label.setBufferPixels(32);
-
-      AttributeProcessor.setAttributes(sf, label, PRIMARY_TAGS, config);
-      AttributeProcessor.setAttributes(sf, label, DETAIL_TAGS, config);
+      Utils.createLabelPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
     }
   }
 
   private void processAerowayPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(this.getLabelMinZoom(sf));
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
+  private LabelZooms getLabelZooms(SourceFeature sf) {
     if (sf.hasTag("aeroway", "aerodrome")) {
       if (sf.hasTag("aerodrome:type", "public", "international")) {
-        return 6;
+        return new LabelZooms(6, 10);
       } else if (sf.hasTag("aerodrome:type", "regional")) {
-        return 8;
+        return new LabelZooms(8, 11);
       } else if (sf.hasTag("operator:type", "public", "government")) {
-        return 10;
+        return new LabelZooms(10, 12);
       } else {
-        return 12;
+        return new LabelZooms(12, 13);
       }
     } else if (sf.hasTag("aeroway", "terminal")) {
-      return 13;
+      return new LabelZooms(13, 14);
     } else {
-      return 14;
+      return new LabelZooms(14, 15);
     }
   }
 

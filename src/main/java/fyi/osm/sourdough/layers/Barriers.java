@@ -11,6 +11,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.List;
 import java.util.Set;
@@ -61,20 +62,15 @@ public class Barriers implements FeatureProcessor, LayerPostProcessor {
   }
 
   private void processBarrierPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
+  private LabelZooms getLabelZooms(SourceFeature sf) {
     return switch (sf.getString("barrier")) {
-      case "border_control", "toll_booth" -> 11;
-      case "gate", "lift_gate", "swing_gate" -> 13;
-      case "block", "motorcycle_barrier" -> 14;
-      default -> 15;
+      case "border_control", "toll_booth" -> new LabelZooms(11, 14);
+      case "gate", "lift_gate", "swing_gate" -> new LabelZooms(13, 16);
+      case "block", "motorcycle_barrier" -> new LabelZooms(14, 17);
+      default -> new LabelZooms(15, 17);
     };
   }
 

@@ -7,6 +7,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.Set;
 
@@ -52,34 +53,24 @@ public class Clubs implements FeatureProcessor {
 
     AttributeProcessor.setAttributes(sf, polygon, PRIMARY_TAGS, config);
 
-    var detailMinZoom = Math.min(getLabelMinZoom(sf), polygon.getMinZoomForPixelSize(32));
+    var detailMinZoom = Math.min(getLabelZooms(sf).min(), polygon.getMinZoomForPixelSize(32));
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
-    var point = fc.pointOnSurface(this.name());
-    point.setMinZoom(detailMinZoom);
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createLabelPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
   private void processClubPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
+  private LabelZooms getLabelZooms(SourceFeature sf) {
     return switch (sf.getString("club")) {
-      case "sport" -> sf.hasTag("sport", "golf") ? 11 : 12;
-      case "scout", "youth" -> 12;
-      case "social", "culture", "veterans" -> 13;
-      case "music", "sailing", "automobile", "motorcycle" -> 13;
-      case "freemasonry" -> 14;
-      default -> 13;
+      case "sport" -> sf.hasTag("sport", "golf") ? new LabelZooms(11, 14) : new LabelZooms(12, 15);
+      case "scout", "youth" -> new LabelZooms(12, 15);
+      case "social", "culture", "veterans" -> new LabelZooms(13, 16);
+      case "music", "sailing", "automobile", "motorcycle" -> new LabelZooms(13, 16);
+      case "freemasonry" -> new LabelZooms(13, 15);
+      default -> new LabelZooms(13, 15);
     };
   }
 }

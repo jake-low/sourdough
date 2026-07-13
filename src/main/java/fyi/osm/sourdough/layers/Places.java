@@ -5,8 +5,6 @@ import static com.onthegomap.planetiler.util.Parse.parseIntOrNull;
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.ForwardingProfile.FeatureProcessor;
 import com.onthegomap.planetiler.expression.Expression;
-import com.onthegomap.planetiler.geo.GeoUtils;
-import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.util.SortKey;
 import com.onthegomap.planetiler.util.ZoomFunction;
@@ -86,13 +84,16 @@ public class Places implements FeatureProcessor {
       return;
     }
 
+    var sizeZoom = Utils.minZoomForPixelSize(sf, 32);
+    var recZoom = Math.min(17, sizeZoom);
+    var minZoom = Math.max(0, recZoom - 2);
+
     var point = fc.pointOnSurface(this.name());
-    try {
-      point.setMinZoom(GeoUtils.minZoomForPixelSize(sf.size(), 32));
-    } catch (GeometryException e) {
-      point.setMinZoom(12);
-    }
+    point.setMinZoom(minZoom);
     point.setBufferPixels(64);
+
+    point.setAttr("_minzoom", minZoom);
+    point.setAttr("_reczoom", recZoom);
 
     AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
     AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
@@ -103,8 +104,15 @@ public class Places implements FeatureProcessor {
       return;
     }
 
+    var minZoom = getLabelMinZoom(sf);
+
     var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
+    point.setMinZoom(minZoom);
+
+    // Place labels are population-scaled and meant to be displayed as soon as
+    // they appear, so the recommended zoom equals the actual minzoom.
+    point.setAttr("_minzoom", minZoom);
+    point.setAttr("_reczoom", minZoom);
 
     // TODO: since we only emit point features for places, there isn't a
     // difference between primary and detail tags (both are always included on

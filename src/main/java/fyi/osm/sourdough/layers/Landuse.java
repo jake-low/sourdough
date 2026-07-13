@@ -11,6 +11,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.Arrays;
 import java.util.List;
@@ -69,11 +70,7 @@ public class Landuse implements FeatureProcessor, LayerPostProcessor {
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
     if (sf.hasTag("name")) {
-      var label = fc.pointOnSurface(this.name());
-      label.setMinZoom(Math.min(14, detailMinZoom));
-
-      AttributeProcessor.setAttributes(sf, label, PRIMARY_TAGS, config);
-      AttributeProcessor.setAttributes(sf, label, DETAIL_TAGS, config);
+      Utils.createLabelPoint(sf, fc, this.name(), new LabelZooms(14, 17), PRIMARY_TAGS, DETAIL_TAGS, config);
     }
   }
 

@@ -7,6 +7,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.Set;
 
@@ -70,12 +71,7 @@ public class Aerialways implements FeatureProcessor {
     var detailMinZoom = Math.min(14, polygon.getMinZoomForPixelSize(32));
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
-    var label = fc.pointOnSurface(this.name());
-    label.setMinZoom(detailMinZoom);
-    label.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, label, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, label, DETAIL_TAGS, config);
+    Utils.createLabelPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
   private void processAerialwayLine(SourceFeature sf, FeatureCollector fc) {
@@ -88,11 +84,10 @@ public class Aerialways implements FeatureProcessor {
   }
 
   private void processAerialwayPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(14);
-    point.setBufferPixels(32);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
+  }
 
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+  private LabelZooms getLabelZooms(SourceFeature sf) {
+    return sf.hasTag("aerialway", "station") ? new LabelZooms(14, 15) : new LabelZooms(14, 16);
   }
 }

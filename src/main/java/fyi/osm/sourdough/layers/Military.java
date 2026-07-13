@@ -8,6 +8,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.Set;
 
@@ -71,35 +72,25 @@ public class Military implements FeatureProcessor {
 
     AttributeProcessor.setAttributes(sf, polygon, PRIMARY_TAGS, config);
 
-    var detailMinZoom = Math.min(getLabelMinZoom(sf), polygon.getMinZoomForPixelSize(64));
+    var detailMinZoom = Math.min(getLabelZooms(sf).min(), polygon.getMinZoomForPixelSize(64));
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
     if (sf.hasTag("name")) {
-      var label = fc.pointOnSurface(this.name());
-      label.setMinZoom(detailMinZoom);
-      label.setBufferPixels(32);
-
-      AttributeProcessor.setAttributes(sf, label, PRIMARY_TAGS, config);
-      AttributeProcessor.setAttributes(sf, label, DETAIL_TAGS, config);
+      Utils.createLabelPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
     }
   }
 
   private void processMilitaryPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
+  private LabelZooms getLabelZooms(SourceFeature sf) {
     return switch (sf.getString("military")) {
-      case "base", "naval_base", "airfield" -> 9;
-      case "barracks", "training_area", "range", "danger_area" -> 11;
-      case "checkpoint", "office", "depot", "nuclear_explosion_site" -> 12;
-      case "bunker", "trench", "obstacle_course", "guard_house" -> 14;
-      default -> 13;
+      case "base", "naval_base", "airfield" -> new LabelZooms(9, 12);
+      case "barracks", "training_area", "range", "danger_area" -> new LabelZooms(11, 13);
+      case "checkpoint", "office", "depot", "nuclear_explosion_site" -> new LabelZooms(12, 14);
+      case "bunker", "trench", "obstacle_course", "guard_house" -> new LabelZooms(14, 16);
+      default -> new LabelZooms(13, 15);
     };
   }
 }

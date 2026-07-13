@@ -11,6 +11,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.List;
 import java.util.Set;
@@ -135,27 +136,17 @@ public class Amenities implements FeatureProcessor, LayerPostProcessor {
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
     if (sf.hasTag("name") || sf.hasTag("ref")) {
-      var label = fc.pointOnSurface(this.name());
-      label.setMinZoom(Math.min(getLabelMinZoom(sf), detailMinZoom));
-      label.setBufferPixels(32);
-
-      AttributeProcessor.setAttributes(sf, label, PRIMARY_TAGS, config);
-      AttributeProcessor.setAttributes(sf, label, DETAIL_TAGS, config);
+      Utils.createLabelPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
     }
   }
 
   private void processAmenityPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
+  private LabelZooms getLabelZooms(SourceFeature sf) {
     return switch (Utils.getFirstTag(sf, AMENITY_KEYS)) {
-      case "hospital", "university" -> 11;
+      case "hospital", "university" -> new LabelZooms(11, 14);
       case
         "place_of_worship",
         "school",
@@ -165,7 +156,7 @@ public class Amenities implements FeatureProcessor, LayerPostProcessor {
         "clinic",
         "townhall",
         "community_centre",
-        "library" -> 12;
+        "library" -> new LabelZooms(12, 15);
       case
         "pharmacy",
         "bank",
@@ -174,7 +165,7 @@ public class Amenities implements FeatureProcessor, LayerPostProcessor {
         "kindergarten",
         "social_facility",
         "veterinary",
-        "conference_center" -> 13;
+        "conference_center" -> new LabelZooms(13, 15);
       // case
       //   "restaurant",
       //   "cafe",
@@ -184,7 +175,7 @@ public class Amenities implements FeatureProcessor, LayerPostProcessor {
       //   "fast_food",
       //   "food_court",
       //   "ice_cream",
-      //   "nightclub" -> 14;
+      //   "nightclub" -> new LabelZooms(14, 16);
       case
         "bench",
         "lounger",
@@ -206,8 +197,8 @@ public class Amenities implements FeatureProcessor, LayerPostProcessor {
         "device_charging_station",
         "parking_space",
         "bicycle_parking",
-        "stadium_seating" -> 15;
-      default -> 14;
+        "stadium_seating" -> new LabelZooms(15, 17);
+      default -> new LabelZooms(14, 16);
     };
   }
 

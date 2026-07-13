@@ -127,6 +127,9 @@ public class Buildings implements FeatureProcessor, LayerPostProcessor {
     point.setMinZoom(14);
     point.setBufferPixels(32);
 
+    point.setAttr("_minzoom", 14);
+    point.setAttr("_reczoom", 15);
+
     AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
     AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
   }
@@ -146,6 +149,9 @@ public class Buildings implements FeatureProcessor, LayerPostProcessor {
     var point = fc.point(this.name());
     point.setMinZoom(15);
     point.setBufferPixels(16);
+
+    point.setAttr("_minzoom", 15);
+    point.setAttr("_reczoom", 17);
 
     AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
     AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);

@@ -11,6 +11,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.List;
 import java.util.Set;
@@ -100,15 +101,10 @@ public class Railways implements FeatureProcessor, LayerPostProcessor {
 
     AttributeProcessor.setAttributes(sf, polygon, PRIMARY_TAGS, config);
 
-    var detailMinZoom = Math.min(getLabelMinZoom(sf), polygon.getMinZoomForPixelSize(32));
+    var detailMinZoom = Math.min(getLabelZooms(sf).min(), polygon.getMinZoomForPixelSize(32));
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
-    var point = fc.pointOnSurface(this.name());
-    point.setMinZoom(detailMinZoom);
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createLabelPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
   private void processRailwayLine(SourceFeature sf, FeatureCollector fc) {
@@ -123,12 +119,7 @@ public class Railways implements FeatureProcessor, LayerPostProcessor {
   }
 
   private void processRailwayPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
   private int getRailwayLineMinZoom(SourceFeature sf) {
@@ -175,12 +166,12 @@ public class Railways implements FeatureProcessor, LayerPostProcessor {
     return Math.min(baseZoom, 13);
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
+  private LabelZooms getLabelZooms(SourceFeature sf) {
     return switch (Utils.getFirstTag(sf, RAILWAY_KEYS)) {
-      case "station" -> 10;
-      case "halt" -> 11;
-      case "stop", "tram_stop" -> 12;
-      default -> 15;
+      case "station" -> new LabelZooms(10, 12);
+      case "halt" -> new LabelZooms(11, 13);
+      case "stop", "tram_stop" -> new LabelZooms(12, 14);
+      default -> new LabelZooms(15, 16);
     };
   }
 

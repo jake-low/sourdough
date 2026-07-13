@@ -59,9 +59,37 @@ Using the strings `"yes"` and `"no"` for these boolean-ish attributes does not s
 
 ## Label points
 
-For area features, Sourdough also includes Points at the centroids of those areas. These label points have exactly the same ID and attributes as the area they correspond to. They are meant to help map makers place labels (text, icons, etc) at the center of the area if they wish. Note that map rendering engines such as MapLibre can't do this client-side, because an area may be split across several tiles and may not all be in view at once, so the client can't necessarily know where its centroid is.
+For area features, Sourdough also includes Points at the centers of those areas. These label points have the same ID and attributes as the area they correspond to, plus the zoom attributes described in the next section. They are meant to help map makers place labels (text, icons, etc) at the center of the area if they wish. Note that map rendering engines such as MapLibre can't do this client-side, because an area may be split across several tiles and may not all be in view at once, so the client can't necessarily know where its centroid is.
 
-Point labels for polygon features appear at the same zoom level as the detail tags for that feature.
+The zoom at which a label point first appears depends both on the feature's tags and on its physical size: label points for huge area features appear in the tiles at much lower zooms than those of tiny areas of the same type. See the next section for details.
+
+## Zoom attributes: `_minzoom` and `_reczoom`
+
+Sourdough deliberately includes many feature types at lower zooms than general purpose maps would want to display them. This supports greater cartographic flexibility. For example, international airports appear at zoom level 6. Most maps won't want to display airports at such low zooms, but they are available for aviation-specific maps to use. General purpose maps can use a `minzoom` on the style layer that renders airports to delay their appearance until a higher zoom like 9 or 10.
+
+A constant minzoom works well for some kinds of features, but not all. Consider parks, which come in a wide range of sizes. There isn't a single fixed zoom level that it makes sense to start labeling parks at; instead the minzoom needs to depend on the size of a given park. Sourdough emits label points for areas when the area reaches a threshold size on screen, which partly addresses this issue (small parks' label points won't be present in the tiles until higher zooms). But this alone doesn't allow map makers to customize the zoom levels that park labels appear at; they are forced to accept Sourdough's choices as implicit rules.
+
+To solve this, Sourdough includes two attributes on Point features:
+- `_minzoom` which is the actual minimum zoom that the label point appears in the tiles
+- `_reczoom` which is the zoom that Sourdough recommends the label be displayed at for general purpose maps
+
+The underscore prefix indicates that these values are computed by Sourdough and do not correspond to OSM tags. Line and polygon features do not carry these attributes. Both values are computed independently for each feature (a large park will have a lower `_reczoom` than a tiny one).
+
+Stylesheets can opt into the recommendations with a MapLibre `filter` expression like this:
+
+```json
+[">=", ["zoom"], ["get", "_reczoom"]]
+```
+
+which displays each label starting at its recommended zoom (even though it may be present in lower zoom tiles too). Each style layer can have its own filter expression, and the `_reczoom` filter above can be combined with other filters using boolean operators to restrict its effect to specific features within a tile layer. Applying a shift to the recommended value, e.g. `[">=", ["zoom"], ["+", ["get", "_reczoom"], -1]]`, makes labels appear earlier or later, thus increasing or decreasing the importance that the map places on these features.
+
+Most feature types have a few zoom levels of headroom for such shifts (the gap between `_minzoom` and `_reczoom`). It's safe to shift by any amount: if the shift is greater than the available headroom, then the effect is clamped (labels will simply appear at the zoom level that the points first appear in the tile). You can combine a `_reczoom`-based filter with a fixed `minzoom` (or `maxzoom`) for the entire layer, in order to define stops above/below which no labels will render.
+
+Note that this filter is only appropriate on style layers that render Point geometries. On a layer that places labels along lines (river names, street names), `["get", "_reczoom"]` evaluates to null and the filter rejects every feature.
+
+`_reczoom` may exceed the tileset's maximum zoom. MapLibre continues to increase the `["zoom"]` expression value past the tileset maxzoom when overzooming, so the filter continues to work. This allows stylesheets to defer labeling tiny features until a very high zoom level, instead of forcing all labels to appear once the tileset max zoom is reached.
+
+The values themselves are editorial judgments and will be tuned over time. In particular, `_minzoom` may be lowered in future versions to accomodate specal-purpose maps that wish to display specific feature types at unusually low zooms. Using either a `_reczoom` filter or a fixed `minzoom` for a style layer whenever possible in your stylesheets will make them more robust against such changes.
 
 ## Layers
 

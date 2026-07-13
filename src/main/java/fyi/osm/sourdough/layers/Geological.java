@@ -7,6 +7,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.Set;
 
@@ -54,16 +55,11 @@ public class Geological implements FeatureProcessor {
 
     AttributeProcessor.setAttributes(sf, polygon, PRIMARY_TAGS, config);
 
-    var detailMinZoom = Math.min(getLabelMinZoom(sf), polygon.getMinZoomForPixelSize(64));
+    var detailMinZoom = Math.min(getLabelZooms(sf).min(), polygon.getMinZoomForPixelSize(64));
     AttributeProcessor.setAttributesWithMinzoom(sf, polygon, DETAIL_TAGS, detailMinZoom, config);
 
     if (sf.hasTag("name") || sf.hasTag("tourism")) {
-      var point = fc.pointOnSurface(this.name());
-      point.setMinZoom(detailMinZoom);
-      point.setBufferPixels(32);
-
-      AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-      AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+      Utils.createLabelPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
     }
   }
 
@@ -80,12 +76,7 @@ public class Geological implements FeatureProcessor {
   }
 
   private void processGeologicalPoint(SourceFeature sf, FeatureCollector fc) {
-    var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
-    point.setBufferPixels(32);
-
-    AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
-    AttributeProcessor.setAttributes(sf, point, DETAIL_TAGS, config);
+    Utils.createPoint(sf, fc, this.name(), getLabelZooms(sf), PRIMARY_TAGS, DETAIL_TAGS, config);
   }
 
   private int getGeologicalLineMinZoom(SourceFeature sf) {
@@ -96,16 +87,16 @@ public class Geological implements FeatureProcessor {
     };
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
+  private LabelZooms getLabelZooms(SourceFeature sf) {
     return switch (sf.getString("geological")) {
-      case "volcanic_lava_field", "volcanic_caldera_rim" -> 8;
-      case "moraine", "volcanic_lava_flow" -> 9;
-      case "outcrop", "palaeontological_site" -> 10;
-      case "fault", "volcanic_vent" -> 11;
-      case "glacial_erratic", "rock_glacier", "meteor_crater" -> 12;
-      case "nunatak", "landslide", "giants_kettle", "limestone_pavement" -> 13;
-      case "karst", "geyser", "hot_spring", "sinkhole", "cave_entrance" -> 13;
-      default -> 12;
+      case "volcanic_lava_field", "volcanic_caldera_rim" -> new LabelZooms(8, 10);
+      case "moraine", "volcanic_lava_flow" -> new LabelZooms(9, 11);
+      case "outcrop", "palaeontological_site" -> new LabelZooms(10, 12);
+      case "fault", "volcanic_vent" -> new LabelZooms(11, 13);
+      case "glacial_erratic", "rock_glacier", "meteor_crater" -> new LabelZooms(12, 13);
+      case "nunatak", "landslide", "giants_kettle", "limestone_pavement" -> new LabelZooms(13, 14);
+      case "karst", "geyser", "hot_spring", "sinkhole", "cave_entrance" -> new LabelZooms(13, 14);
+      default -> new LabelZooms(12, 13);
     };
   }
 }

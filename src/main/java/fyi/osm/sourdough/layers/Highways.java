@@ -11,6 +11,7 @@ import com.onthegomap.planetiler.reader.SourceFeature;
 import fyi.osm.sourdough.Configuration;
 import fyi.osm.sourdough.Constants;
 import fyi.osm.sourdough.util.AttributeProcessor;
+import fyi.osm.sourdough.util.LabelZooms;
 import fyi.osm.sourdough.util.Utils;
 import java.util.*;
 
@@ -162,8 +163,13 @@ public class Highways implements FeatureProcessor, LayerPostProcessor {
   }
 
   private void processHighwayPoint(SourceFeature sf, FeatureCollector fc) {
+    var zooms = getLabelZooms(sf);
+
     var point = fc.point(this.name());
-    point.setMinZoom(getLabelMinZoom(sf));
+    point.setMinZoom(zooms.min());
+
+    point.setAttr("_minzoom", zooms.min());
+    point.setAttr("_reczoom", zooms.rec());
 
     AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
     AttributeProcessor.setAttributes(sf, point, LABEL_TAGS, config);
@@ -179,6 +185,9 @@ public class Highways implements FeatureProcessor, LayerPostProcessor {
   private void processJunctionPoint(SourceFeature sf, FeatureCollector fc) {
     var point = fc.point(this.name());
     point.setMinZoom(14);
+
+    point.setAttr("_minzoom", 14);
+    point.setAttr("_reczoom", 16);
 
     AttributeProcessor.setAttributes(sf, point, PRIMARY_TAGS, config);
     AttributeProcessor.setAttributes(sf, point, LABEL_TAGS, config);
@@ -227,11 +236,11 @@ public class Highways implements FeatureProcessor, LayerPostProcessor {
     return zoom;
   }
 
-  private int getLabelMinZoom(SourceFeature sf) {
+  private LabelZooms getLabelZooms(SourceFeature sf) {
     return switch (effectiveHighwayClass(sf)) {
-      case "trailhead" -> 11;
-      case "turning_circle", "turning_loop" -> 14;
-      default -> 15;
+      case "trailhead" -> new LabelZooms(11, 13);
+      case "turning_circle", "turning_loop" -> new LabelZooms(14, 16);
+      default -> new LabelZooms(15, 16);
     };
   }
 
