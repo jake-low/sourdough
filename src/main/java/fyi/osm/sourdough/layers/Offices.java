@@ -76,7 +76,8 @@ public class Offices implements FeatureProcessor {
 
   private LabelZooms getLabelZooms(SourceFeature sf) {
     return switch (sf.getString("office")) {
-      default -> new LabelZooms(14, 15);
+      case "government", "diplomatic" -> new LabelZooms(13, 15);
+      default -> new LabelZooms(14, 16);
     };
   }
 }
