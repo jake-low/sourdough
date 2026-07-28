@@ -45,7 +45,7 @@ public class Highways implements FeatureProcessor, LayerPostProcessor {
 
   public static final Set<String> PRIMARY_TAGS = Utils.union(
     TOP_LEVEL_TAGS,
-    Set.of("expressway", "informal", "construction", "proposed")
+    Set.of("expressway", "toll", "informal", "construction", "proposed")
   );
 
   public static final Set<String> LABEL_TAGS = Set.of("name", "ref", "surface");

@@ -211,7 +211,7 @@ This layer also contains features tagged `junction=*`, which is used to map cert
 This layer **excludes** features tagged `highway=construction` or `highway=proposed`.
 
 **Attributes**:
-- **Primary**: `highway`, `expressway`, `junction`, `informal`
+- **Primary**: `highway`, `expressway`, `toll`, `junction`, `informal`
 - **Detail**: `name`, `ref`, `surface`, `service`, `junction`, `dual_carriageway`, `motorroad`, `oneway`, `operator`, `website`, `footway`, `crossing`, `crossing:markings`, `crossing:signals`, `crossing:signed`, `crossing:island`, `tactile_paving`, `button_operated`, `segregated`, `sidewalk`, `sidewalk:left`, `sidewalk:right`, `access`, `motor_vehicle`, `bicycle`, `foot`, `wheelchair`, `dog`, `supervised`, `lit`, `smoothness`, `sac_scale`, `trail_visibility`, `mtb`, `mtb:scale`, `mtb:scale:imba`, `layer`, `bridge`, `tunnel`, `location`, `covered`, `indoor`
 
 Notes
