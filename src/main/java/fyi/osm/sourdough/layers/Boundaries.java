@@ -46,6 +46,11 @@ public class Boundaries implements FeatureProcessor, LayerPostProcessor, OsmRela
       "protect_class",
       "operator",
       "ownership",
+      "start_date",
+      "admin_level",
+      "border_type",
+      "place",
+      "locality",
       "claimed_by",
       "disputed_by",
       "recognized_by"
@@ -119,6 +124,33 @@ public class Boundaries implements FeatureProcessor, LayerPostProcessor, OsmRela
 
       if (sf.hasTag("name")) {
         Utils.createLabelPoint(sf, fc, this.name(), new LabelZooms(15, 17), PRIMARY_TAGS, DETAIL_TAGS, config);
+      }
+    } else if (sf.hasTag("boundary", "administrative")) {
+      var polygon = fc.polygon(this.name());
+      polygon.setMinPixelSize(2.0);
+      polygon.setPixelTolerance(0.25);
+      int adminLevel = 99;
+      String adminLevelStr = sf.getString("admin_level");
+
+      if (adminLevelStr != null) {
+        try {
+          adminLevel = Integer.parseInt(adminLevelStr);
+        } catch (NumberFormatException e) {
+          // ignore
+        }
+      }
+
+      int minZoom = getAdminBoundaryMinZoom(adminLevel);
+      polygon.setMinZoom(minZoom);
+
+      AttributeProcessor.setAttributes(sf, polygon, PRIMARY_TAGS, config);
+      AttributeProcessor.setAttributes(sf, polygon, DETAIL_TAGS, config);
+
+      if (sf.hasTag("name")) {
+        var label = fc.pointOnSurface(this.name());
+        label.setMinZoom(minZoom);
+        AttributeProcessor.setAttributes(sf, label, PRIMARY_TAGS, config);
+        AttributeProcessor.setAttributes(sf, label, DETAIL_TAGS, config);
       }
     }
   }
