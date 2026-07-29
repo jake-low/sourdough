@@ -2,6 +2,14 @@
 
 This file documents notable changes to the Sourdough schema and its reference implementation.
 
+## v0.4.0
+
+- Add `_minzoom` and `_reczoom` attributes to point features in all layers (see SCHEMA.md)
+- Add administrative boundary polygons (previously admin boundaries were only emitted as lines)
+- Add `toll` as a primary tag to highways layer
+- Show government and diplomatic offices at lower zooms
+- Bump planetiler to 0.10.2
+
 ## v0.3.0
 
 Headline items:
