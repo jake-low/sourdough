@@ -139,7 +139,7 @@ The `boundaries` layer contains administrative boundaries from OSM relations tag
 
 **Attributes**:
 - **Primary**: `boundary`, `admin_level`, `maritime`
-- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `protected_area`, `leisure`, `protection_title`, `protect_class`, `operator`, `ownership`, `claimed_by`, `disputed_by`, `recognized_by`
+- **Detail**: `name`, `ref`, `alt_name`, `short_name`, `official_name`, `wikidata`, `wikipedia`, `protected_area`, `leisure`, `protection_title`, `protect_class`, `operator`, `ownership`, `start_date`, `border_type`, `place`, `locality`, `claimed_by`, `disputed_by`, `recognized_by`
 
 ### Buildings
 

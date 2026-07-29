@@ -47,7 +47,6 @@ public class Boundaries implements FeatureProcessor, LayerPostProcessor, OsmRela
       "operator",
       "ownership",
       "start_date",
-      "admin_level",
       "border_type",
       "place",
       "locality",
